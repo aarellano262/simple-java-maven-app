@@ -40,7 +40,7 @@ pipeline {
 		
             steps {
                 rtMavenRun (
-                    tool: 'maven-default', // Tool name from Jenkins configuration
+                    tool: 'mvn',
                     pom: '../pom.xml',
                     goals: 'clean package -B -DskipTests',
                     deployerId: "MAVEN_DEPLOYER",
@@ -53,7 +53,7 @@ pipeline {
 		
             steps {
                 rtMavenRun (
-                    tool: 'maven-default', // Tool name from Jenkins configuration
+                    tool: 'mvn',
                     pom: '../pom.xml',
                     goals: 'test',
                     deployerId: "MAVEN_DEPLOYER",
