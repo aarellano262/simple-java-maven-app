@@ -13,23 +13,23 @@ pipeline {
 		
             steps {
 			
-				// Values from Artifactory plugin config
-                rtServer (
-                    id: "ARTIFACTORY_SERVER",
-                    url: SERVER_URL,
-                    credentialsId: CREDENTIALS
-                )
+				// tekgsartifactory = Id defined in Artifactory plugin
+                //rtServer (
+                //    id: "tekgsartifactory",
+                //    url: SERVER_URL,
+                //    credentialsId: CREDENTIALS
+                //)
 
                 rtMavenDeployer (
                     id: "MAVEN_DEPLOYER",
-                    serverId: "ARTIFACTORY_SERVER",
+                    serverId: "tekgsartifactory",
                     releaseRepo: "libs-release-local",
                     snapshotRepo: "libs-snapshot-local"
                 )
 
                 rtMavenResolver (
                     id: "MAVEN_RESOLVER",
-                    serverId: "ARTIFACTORY_SERVER",
+                    serverId: "tekgsartifactory",
                     releaseRepo: "libs-release",
                     snapshotRepo: "libs-snapshot"
                 )
@@ -70,7 +70,7 @@ pipeline {
         stage ('Publish build info') {
             steps {
                 rtPublishBuildInfo (
-                    serverId: "ARTIFACTORY_SERVER"
+                    serverId: "tekgsartifactory"
                 )
             }
         }
