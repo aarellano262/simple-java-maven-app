@@ -1,6 +1,15 @@
 pipeline {
 
     agent any
+	
+	tools {
+	
+	    // Get the Maven tool.
+        // ** NOTE: This 'maven3' Maven tool must be configured
+        // **       in the global configuration.
+			
+        maven 'maven3'
+    }
     
     stages {
         stage ('Checkout SCM') {
@@ -38,14 +47,9 @@ pipeline {
 
         stage ('Build') {
 		
-		    // Get the Maven tool.
-            // ** NOTE: This 'M3' Maven tool must be configured
-            // **       in the global configuration.
-            def mvnHome = tool 'maven3'
-        
             steps {
                 rtMavenRun (
-                    tool: '${mvnHome}/bin/mvn',
+                    tool: 'mvn',
                     pom: '../pom.xml',
                     goals: 'clean package -B -DskipTests',
                     deployerId: "MAVEN_DEPLOYER",
@@ -58,7 +62,7 @@ pipeline {
         
             steps {
                 rtMavenRun (
-                    tool: '${mvnHome}/bin/mvn',
+                    tool: 'mvn',
                     pom: '../pom.xml',
                     goals: 'test',
                     deployerId: "MAVEN_DEPLOYER",
