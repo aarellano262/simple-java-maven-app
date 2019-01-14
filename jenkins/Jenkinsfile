@@ -3,17 +3,17 @@ pipeline {
     agent any
     
     stages {
-		stage ('Checkout SCM') {
+        stage ('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
-		
-		stage ('Artifactory Maven Configuration') {
-		
+        
+        stage ('Artifactory Maven Configuration') {
+        
             steps {
-			
-				// tekgsartifactory = Id defined in Artifactory plugin
+            
+                // tekgsartifactory = Id defined in Artifactory plugin
                 //rtServer (
                 //    id: "tekgsartifactory",
                 //    url: SERVER_URL,
@@ -38,9 +38,14 @@ pipeline {
 
         stage ('Build') {
 		
+		    // Get the Maven tool.
+            // ** NOTE: This 'M3' Maven tool must be configured
+            // **       in the global configuration.
+            def mvnHome = tool 'maven3'
+        
             steps {
                 rtMavenRun (
-                    tool: 'mvn',
+                    tool: '${mvnHome}/bin/mvn',
                     pom: '../pom.xml',
                     goals: 'clean package -B -DskipTests',
                     deployerId: "MAVEN_DEPLOYER",
@@ -48,19 +53,19 @@ pipeline {
                 )
             }
         }
-		
-		stage ('Test') {
-		
+        
+        stage ('Test') {
+        
             steps {
                 rtMavenRun (
-                    tool: 'mvn',
+                    tool: '${mvnHome}/bin/mvn',
                     pom: '../pom.xml',
                     goals: 'test',
                     deployerId: "MAVEN_DEPLOYER",
                     resolverId: "MAVEN_RESOLVER"
                 )
             }
-			post {
+            post {
                 always {
                     junit 'target/surefire-reports/*.xml'
                 }
