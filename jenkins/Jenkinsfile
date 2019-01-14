@@ -1,29 +1,77 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args '-v /root/.m2:/root/.m2'
-        }
-    }
+
+    agent any
+    
     stages {
-        stage('Build') {
+		stage ('Checkout SCM') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
+                checkout scm
             }
         }
-        stage('Test') {
+		
+		stage ('Artifactory Maven Configuration') {
+		
             steps {
-                sh 'mvn test'
+			
+				// Values from Artifactory plugin config
+                rtServer (
+                    id: "ARTIFACTORY_SERVER",
+                    url: SERVER_URL,
+                    credentialsId: CREDENTIALS
+                )
+
+                rtMavenDeployer (
+                    id: "MAVEN_DEPLOYER",
+                    serverId: "ARTIFACTORY_SERVER",
+                    releaseRepo: "libs-release-local",
+                    snapshotRepo: "libs-snapshot-local"
+                )
+
+                rtMavenResolver (
+                    id: "MAVEN_RESOLVER",
+                    serverId: "ARTIFACTORY_SERVER",
+                    releaseRepo: "libs-release",
+                    snapshotRepo: "libs-snapshot"
+                )
             }
-            post {
+        }
+
+        stage ('Build') {
+		
+            steps {
+                rtMavenRun (
+                    tool: 'maven-default', // Tool name from Jenkins configuration
+                    pom: '../pom.xml',
+                    goals: 'clean package -B -DskipTests',
+                    deployerId: "MAVEN_DEPLOYER",
+                    resolverId: "MAVEN_RESOLVER"
+                )
+            }
+        }
+		
+		stage ('Test') {
+		
+            steps {
+                rtMavenRun (
+                    tool: 'maven-default', // Tool name from Jenkins configuration
+                    pom: '../pom.xml',
+                    goals: 'test',
+                    deployerId: "MAVEN_DEPLOYER",
+                    resolverId: "MAVEN_RESOLVER"
+                )
+            }
+			post {
                 always {
                     junit 'target/surefire-reports/*.xml'
                 }
             }
         }
-        stage('Deliver') {
+
+        stage ('Publish build info') {
             steps {
-                sh './jenkins/scripts/deliver.sh'
+                rtPublishBuildInfo (
+                    serverId: "ARTIFACTORY_SERVER"
+                )
             }
         }
     }
