@@ -44,7 +44,7 @@ pipeline {
             steps {
                 rtMavenRun (
                     tool: 'maven3',
-                    pom: '../pom.xml',
+                    pom: 'pom.xml',
                     goals: 'clean package -B -DskipTests',
                     deployerId: "MAVEN_DEPLOYER",
                     resolverId: "MAVEN_RESOLVER"
@@ -57,7 +57,7 @@ pipeline {
             steps {
                 rtMavenRun (
                     tool: 'maven3',
-                    pom: '../pom.xml',
+                    pom: 'pom.xml',
                     goals: 'test',
                     deployerId: "MAVEN_DEPLOYER",
                     resolverId: "MAVEN_RESOLVER"
